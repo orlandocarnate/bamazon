@@ -16,7 +16,10 @@ An Amazon-like storefront using MySQL. The app will take in orders from customer
     * EX: [{name: "item 1, value: 1}]
 
 ## Callback workflow
-1. Call
+Needed to use lots of callbacks to deal with async issues without installing sync modules.
+Need to keep track the flow of callbacks.
+1. Call sqlQueryCallFunction(callback)
+    * Ex: `viewProducts(tableGenerator);`
 
 ### Regular Expressions - doesn't work without an npm module
 [W3Schools .match(regexp)](https://www.w3schools.com/js/js_regexp.asp)

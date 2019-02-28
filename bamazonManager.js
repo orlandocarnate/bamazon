@@ -15,11 +15,6 @@ const config = {
 // ESTABLISH CONNECTION object
 var connection = mysql.createConnection(config);
 
-// End connection when done.
-const closeDB = () => {
-    connection.end();
-}
-
 var menu = {
     type: 'list',
     name: 'menu',
@@ -27,25 +22,72 @@ var menu = {
     choices: ['View Products For Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product', 'Quit']
 };
 
-const exitApp = () => {
-    inquirer.prompt([
-        {
-            type: 'confirm',
-            name: 'gohome',
-            message: 'Are you sure you want to Quit?',
-            default: false
-        }
-    ]).then(answers => {
-        if (answers.gohome) {
-            console.log("Goodbye!");
-            closeDB();
-        } else {
-            mainMenu();
-        }
-    })
+// ----- CRUD FUNCTIONS ----- \\
+
+const viewProducts = (callback) => {
+    const queryStr = "SELECT * FROM products";
+    connection.query(queryStr, function (err, response) {
+        if (err) throw err;
+        products = response; // assign to global variable
+        callback(response, goHome); // Callback = tableGenerator()
+    });
 }
 
-function tableGenerator(arg, callback) {
+const viewLowInventory = (callback) => {
+    // show inventory where QTY <= 5
+    const queryStr = "SELECT * FROM products WHERE stock_quantity <= 5";
+    connection.query(queryStr, function (err, response) {
+        if (err) throw err;
+        products = response; // assign to global variable
+        callback(response, goHome); // callback = tableGenerator()
+    });
+}
+
+const updateInventoryList = (callback) => {
+    // get all the products
+    const queryStr = "SELECT * FROM products";
+    connection.query(queryStr, function (err, response) {
+        if (err) throw err;
+        const prodArray = response.map(element => {
+            let obj = {};
+            obj.name = element.product_name;
+            obj.value = element.item_id
+            return obj
+        });
+        //
+        callback(prodArray, updateSingleItem); // Callback = updateInventoryPrompt()
+    });
+}
+
+const updateSingleItem = (currentID, currentQTY, callback) => {
+    const queryStr = "UPDATE products SET stock_quantity = stock_quantity + ? WHERE item_id = ?";
+    connection.query(queryStr, [currentQTY, currentID], function (err, response) {
+        if (err) throw err;
+        console.log(response.message);
+        callback(); // CALLBACK -> goHome()
+    });
+}
+
+const insertItem = (product_name, department_name, price, stock_quantity, callback) => {
+    const queryStr = "INSERT INTO products SET ?";
+    const newitem = [{
+        product_name: product_name,
+        department_name: department_name,
+        price: price,
+        stock_quantity: stock_quantity
+    }]
+    connection.query(queryStr, newitem, function (err, response) {
+        if (err) throw err;
+        console.log(response.message);
+        callback(); // CALLBACK -> goHome()
+    });
+}
+
+// ----- END CRUD FUNCTIONS ----- \\
+
+
+// ----- TABLE GENERATORS ----- \\
+const tableGenerator = (arg, callback) => {
     let prodTable = new Table;
     arg.forEach(element => {
         prodTable.cell("Item ID", element.item_id);
@@ -56,10 +98,10 @@ function tableGenerator(arg, callback) {
     });
     console.log('\033[2J'); // clears screen
     console.log(prodTable.toString());
-    callback();
+    callback(); // callback = goHome()
 }
 
-function singleItemTable(arg, callback) {
+const singleItemTable = (arg, callback) => {
     const total = order.price * currentQTY;
     let prodTable = new Table;
     prodTable.cell("Item ID", arg.item_id);
@@ -73,63 +115,11 @@ function singleItemTable(arg, callback) {
     console.log(prodTable.toString());
     callback();
 }
+// ----- END TABLE GENERATORS ----- \\
 
-const viewProducts = (callback) => {
-    const queryStr = "SELECT * FROM products";
-    connection.query(queryStr, function (err, response) {
-        if (err) throw err;
-        products = response; // assign to global variable
-        callback(response, goHome);
-    });
-}
 
-function viewLowInventory(callback) {
-    // show inventory where QTY <= 5
-    const queryStr = "SELECT * FROM products WHERE stock_quantity <= 5";
-    connection.query(queryStr, function (err, response) {
-        if (err) throw err;
-        products = response; // assign to global variable
-        callback(response, goHome);
-    });
-}
-
-function viewSingleItem(itemID, callback) {
-    // show single item based on ID
-    const queryStr = "SELECT * FROM products WHERE item_id = ?";
-    connection.query(queryStr, itemID, function (err, response) {
-        if (err) throw err;
-        callback(response, goHome);
-    });
-}
-
-const updateSingleItem = (currentID, currentQTY, callback) => {
-    const queryStr = "UPDATE products SET stock_quantity = stock_quantity + ? WHERE item_id = ?";
-    connection.query(queryStr, [currentQTY, currentID], function (err, response) {
-        if (err) throw err;
-        console.log(response.message);
-        callback(); // CALLBACK
-    });
-}
-
-function updateInventoryList(callback) {
-    // get all the products
-    const queryStr = "SELECT * FROM products";
-    connection.query(queryStr, function (err, response) {
-        if (err) throw err;
-        const prodArray = response.map(element => {
-            let obj = {};
-            obj.name = element.product_name;
-            obj.value = element.item_id
-            return obj
-        }); // assign to global variable
-        // console.log(prod);
-        callback(prodArray, updateSingleItem);
-    });
-    // increase QTY of specific product
-
-}
-
-function updateInventoryPrompt(prodArray, callback) {
+// ----- INQUIRER PROMPTS ----- \\
+const updateInventoryPrompt = (prodArray, callback) => {
     let currentID;
     let addQty;
     inquirer.prompt([
@@ -156,15 +146,56 @@ function updateInventoryPrompt(prodArray, callback) {
         addQty = parseInt(answers.itemQty);
         console.log(answers);
         console.log(`ID: ${currentID}, Qty to add: ${addQty}`);
-        callback(currentID, addQty, exitApp); // call updateSingleItem()
+        callback(currentID, addQty, goHome); // call updateSingleItem()
     })
 }
 
-function addNewProduct() {
+const insertNewProduct = (callback) => {
     // INSERT INTO a new product.
+    let currentID;
+    let addQty;
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'product_name',
+            message: 'Please enter a product name: ',
+        },
+        {
+            type: 'input',
+            name: 'department_name',
+            message: 'Enter department name:',
+        },
+        {
+            type: 'input',
+            name: 'price',
+            message: 'Enter price:',
+            validate: value => {
+                if (isNaN(value) === false && value > 0) {
+                    return true;
+                }
+                return "Please enter a number!";
+            }
+        },
+        {
+            type: 'input',
+            name: 'stock_quantity',
+            message: 'Enter initial stock quantity:',
+            validate: value => {
+                if (isNaN(value) === false) {
+                    return true;
+                }
+                return "Please enter a number!";
+            }
+        }
+    ]).then(answers => {
+        currentID = parseInt(answers.itemID);
+        addQty = parseInt(answers.itemQty);
+        console.log(`New item you are adding:\nName: ${answers.product_name}, Dept: ${answers.department_name}, Price: $${answers.price}, Stock Qty: ${answers.stock_quantity}`);
+        callback(answers.product_name, answers.department_name, parseInt(answers.price), parseInt(answers.stock_quantity), goHome); // call updateSingleItem()
+    })
 }
 
-function mainMenu() {
+const mainMenu = () => {
     console.log('\033[2J'); // clears screen
     inquirer.prompt(menu).then(answers => {
         // console.log(answers);
@@ -177,24 +208,24 @@ function mainMenu() {
                 viewLowInventory(tableGenerator);
                 break;
             case 'Add to Inventory':
-            updateInventoryList(updateInventoryPrompt); // SQL SELECT *, then set callback to UpdatePrompt
+                updateInventoryList(updateInventoryPrompt); // SQL SELECT *, then set callback to UpdatePrompt
                 break;
             case 'Add New Product':
-                addNewProduct(addItem);
+                insertNewProduct(insertItem);
                 break;
             case 'Quit':
-                exitApp();
+                goHome();
                 break;
         }
     });
 }
 
-function goHome() {
+const goHome = () => {
     inquirer.prompt([
         {
             type: 'confirm',
             name: 'gohome',
-            message: 'Return to Menu?',
+            message: '(Y) for Menu, (N) to Quit: ',
             default: true
         }
     ]).then(answers => {
@@ -202,9 +233,10 @@ function goHome() {
             mainMenu();
         } else {
             console.log("Goodbye!");
-            closeDB();
+            connection.end();// end connection
         }
     })
 }
+// ----- END INQUIRER PROMPTS ----- \\
 
-mainMenu();
+mainMenu(); // run program
