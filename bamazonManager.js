@@ -78,33 +78,37 @@ function viewLowInventory(callback) {
     });
 }
 
-function addToInventory() {
+let prod;
+function addToInventory(callback) {
+    // get all the products
+    const queryStr = "SELECT * FROM products";
+    connection.query(queryStr, function (err, response) {
+        if (err) throw err;
+        prod = response.map(element => {
+            let obj = {};
+            obj.name = element.product_name;
+            obj.value = element.item_id
+            return obj
+        }); // assign to global variable
+        // console.log(prod);
+        callback(prod);
+    });
     // increase QTY of specific product
+
+}
+
+function addInvPrompt (prod) {
     inquirer.prompt([
         {
-            type: input,
+            type: 'list',
             name: 'itemID',
-            message: 'Please enter the Item ID you wish to add more of: ',
-            validate: value => {
-                if (isNaN(value) === false) {
-                    return true;
-                }
-                return "Please enter a number!";
-            }
-        }
-        {
-            type: input,
-            name: 'itemID',
-            message: 'Please enter the Item ID you wish to add more of: ',
-            validate: value => {
-                if (isNaN(value) === false) {
-                    return true;
-                }
-                return "Please enter a number!";
-            }
+            message: 'Please select from the list that you would like to add more of.',
+            paginated: true,
+            choices: prod
         }
     ]).then(answers => {
-        const currentID = parseInt(answers.itemID);
+        console.log(answers.itemID);
+        // const currentID = parseInt(answers.itemID);
         //
     })
 }
@@ -126,7 +130,7 @@ function mainMenu() {
                 viewLowInventory(tableGenerator);
                 break;
             case 'Add to Inventory':
-                addToInventory();
+                addToInventory(addInvPrompt);
                 break;
             case 'Add New Product':
                 addNewProduct(goHome);

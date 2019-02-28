@@ -10,5 +10,10 @@ An Amazon-like storefront using MySQL. The app will take in orders from customer
 * [CLI table](https://www.npmjs.com/package/cli-table) Another Table alternative for the CLI.
 
 
-### Regular Expressions
+## Programmer's Notes
+* Inquirer can have paginated lists
+    * Each item in list can have a value
+    * EX: [{name: "item 1, value: 1}]
+
+### Regular Expressions - doesn't work without an npm module
 [W3Schools .match(regexp)](https://www.w3schools.com/js/js_regexp.asp)
