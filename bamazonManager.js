@@ -26,11 +26,6 @@ var menu = {
     choices: ['View Products For Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product', 'Quit']
 };
 
-function start() {
-    console.log('Main Menu');
-    menu();
-}
-
 const exitApp = () => {
     inquirer.prompt([
         {
@@ -49,7 +44,7 @@ const exitApp = () => {
     })
 }
 
-function viewProducts(callback) {
+const viewProducts= (callback) => {
     const queryStr = "SELECT * FROM products";
     connection.query(queryStr, function (err, response) {
         if (err) throw err;

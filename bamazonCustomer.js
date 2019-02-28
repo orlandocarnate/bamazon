@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var Table = require('easy-table');
 let products;
 const heading = [
     ['Id', 'Product Name', 'Department', 'Price', 'Stock Qty']
@@ -21,19 +22,30 @@ const closeDB = () => {
     connection.end();
 }
 
-// show items as a table
-const showTable = () => {
-    const items = products.map(product => {
-        return `ID: ${product.item_id}, Name: ${product.product_name} \t Price: $${product.price} \t QTY: ${product.stock_quantity}`;
-
-    })
-    console.log(items.join("\n"));
+function showTable(arg) {
+    let prodTable = new Table;
+    arg.forEach(element => {
+        prodTable.cell("Item ID", element.item_id);
+        prodTable.cell("Product Name", element.product_name);
+        prodTable.cell("Price", element.price, Table.number(2));
+        prodTable.cell("Stock Quantity", element.stock_quantity);
+        prodTable.newRow();
+    });
+    console.log('\033[2J'); // clears screen
+    console.log(prodTable.toString());
     buyPrompt();
-}
-
-const getItem = (id, callback) => {
 
 }
+
+// show items as a table
+// const showTable = () => {
+//     const items = products.map(product => {
+//         return `ID: ${product.item_id}, Name: ${product.product_name} \t Price: $${product.price} \t QTY: ${product.stock_quantity}`;
+
+//     })
+//     console.log(items.join("\n"));
+//     buyPrompt();
+// }
 
 // MYSQL READ All items
 const getAll = (callback) => {
@@ -42,7 +54,7 @@ const getAll = (callback) => {
         if (err) throw err;
         // callback(); // CALLBACK
         products = response; // assign to global variable
-        callback();
+        callback(response);
     });
 }
 
@@ -127,4 +139,4 @@ const processOrder = (id, qty) => {
 
     start();
 
-    closeDB();
+    // closeDB();

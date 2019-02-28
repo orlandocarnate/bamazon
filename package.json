@@ -1,0 +1,25 @@
+{
+  "name": "bamazon",
+  "version": "1.0.0",
+  "description": "An Amazon-like storefront using MySQL. The app will take in orders from customers and deplete stock from the store's inventory.",
+  "main": "bamazonCustomer.js",
+  "dependencies": {
+    "easy-table": "^1.1.1",
+    "inquirer": "^6.2.2",
+    "mysql": "^2.16.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orlandocarnate/bamazon.git"
+  },
+  "author": "Orlando Carnate",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/orlandocarnate/bamazon/issues"
+  },
+  "homepage": "https://github.com/orlandocarnate/bamazon#readme"
+}
