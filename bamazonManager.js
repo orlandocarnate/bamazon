@@ -1,6 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var Table = require('easy-table');
+let prod;
 
 // MySQL Config
 const config = {
@@ -58,6 +59,21 @@ function tableGenerator(arg, callback) {
     callback();
 }
 
+function singleItemTable(arg, callback) {
+    const total = order.price * currentQTY;
+    let prodTable = new Table;
+    prodTable.cell("Item ID", arg.item_id);
+    prodTable.cell("Product Name", arg.product_name);
+    prodTable.cell("Price", arg.price, Table.number(2));
+    // prodTable.cell("Stock Quantity", arg.stock_quantity);
+    prodTable.cell("Order Quantity", currentQTY);
+    prodTable.cell("Total Price", arg.price * currentQTY, Table.number(2));
+    prodTable.newRow();
+    console.log('\033[2J'); // clears screen
+    console.log(prodTable.toString());
+    callback();
+}
+
 const viewProducts = (callback) => {
     const queryStr = "SELECT * FROM products";
     connection.query(queryStr, function (err, response) {
@@ -66,7 +82,6 @@ const viewProducts = (callback) => {
         callback(response, goHome);
     });
 }
-
 
 function viewLowInventory(callback) {
     // show inventory where QTY <= 5
@@ -78,38 +93,70 @@ function viewLowInventory(callback) {
     });
 }
 
-let prod;
-function addToInventory(callback) {
+function viewSingleItem(itemID, callback) {
+    // show single item based on ID
+    const queryStr = "SELECT * FROM products WHERE item_id = ?";
+    connection.query(queryStr, itemID, function (err, response) {
+        if (err) throw err;
+        callback(response, goHome);
+    });
+}
+
+const updateSingleItem = (currentID, currentQTY, callback) => {
+    const queryStr = "UPDATE products SET stock_quantity = stock_quantity + ? WHERE item_id = ?";
+    connection.query(queryStr, [currentQTY, currentID], function (err, response) {
+        if (err) throw err;
+        console.log(response.message);
+        callback(); // CALLBACK
+    });
+}
+
+function updateInventoryList(callback) {
     // get all the products
     const queryStr = "SELECT * FROM products";
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
-        prod = response.map(element => {
+        const prodArray = response.map(element => {
             let obj = {};
             obj.name = element.product_name;
             obj.value = element.item_id
             return obj
         }); // assign to global variable
         // console.log(prod);
-        callback(prod);
+        callback(prodArray, updateSingleItem);
     });
     // increase QTY of specific product
 
 }
 
-function addInvPrompt (prod) {
+function updateInventoryPrompt(prodArray, callback) {
+    let currentID;
+    let addQty;
     inquirer.prompt([
         {
             type: 'list',
             name: 'itemID',
-            message: 'Please select from the list that you would like to add more of.',
+            message: 'Please select from the list that you would like to add more of.\n',
             paginated: true,
-            choices: prod
+            choices: prodArray
+        },
+        {
+            type: 'input',
+            name: 'itemQty',
+            message: 'How much would you like to add? ',
+            validate: value => {
+                if (isNaN(value) === false && value > 0) {
+                    return true;
+                }
+                return "Please enter a number!";
+            }
         }
     ]).then(answers => {
-        console.log(answers.itemID);
-        // const currentID = parseInt(answers.itemID);
-        //
+        currentID = parseInt(answers.itemID);
+        addQty = parseInt(answers.itemQty);
+        console.log(answers);
+        console.log(`ID: ${currentID}, Qty to add: ${addQty}`);
+        callback(currentID, addQty, exitApp); // call updateSingleItem()
     })
 }
 
@@ -130,10 +177,10 @@ function mainMenu() {
                 viewLowInventory(tableGenerator);
                 break;
             case 'Add to Inventory':
-                addToInventory(addInvPrompt);
+            updateInventoryList(updateInventoryPrompt); // SQL SELECT *, then set callback to UpdatePrompt
                 break;
             case 'Add New Product':
-                addNewProduct(goHome);
+                addNewProduct(addItem);
                 break;
             case 'Quit':
                 exitApp();

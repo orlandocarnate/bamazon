@@ -15,5 +15,8 @@ An Amazon-like storefront using MySQL. The app will take in orders from customer
     * Each item in list can have a value
     * EX: [{name: "item 1, value: 1}]
 
+## Callback workflow
+1. Call
+
 ### Regular Expressions - doesn't work without an npm module
 [W3Schools .match(regexp)](https://www.w3schools.com/js/js_regexp.asp)
