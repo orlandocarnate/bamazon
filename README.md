@@ -4,9 +4,9 @@ An Amazon-like storefront using MySQL. The app will take in orders from customer
 ## Technology Used
 * Node.js
 * MySQL
-* [MySQL Node Module](https://www.npmjs.com/package/mysql) is a driver for MySQL. 
-* [Inquirer](https://www.npmjs.com/package/inquirer) is a command line interface (CLI)
-* [Table Node Module](https://www.npmjs.com/package/table) for formatting tables in the console.
+* [MySQL](https://www.npmjs.com/package/mysql) Node module is a driver for MySQL. 
+* [Inquirer](https://www.npmjs.com/package/inquirer) Node module prompts the user. A command line interface (CLI)
+* [Easy Table](https://www.npmjs.com/package/easy-table) Node module for formatting tables in the console.
 
 
 ### Regular Expressions

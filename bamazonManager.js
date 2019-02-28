@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var Table = require('easy-table');
 
 // MySQL Config
 const config = {
@@ -59,9 +60,19 @@ function viewProducts(callback) {
 }
 
 function showProducts(arg) {
-    console.log(arg.map(element => {
-        return `ID: ${element.item_id} Name: ${element.product_name} Price: $${element.price} Qty Left: ${element.stock_quantity}`
-    }).join("\n"));
+    let prodTable = new Table;
+    arg.forEach(element => {
+        prodTable.cell("Item ID", element.item_id);
+        prodTable.cell("Product Name", element.product_name);
+        prodTable.cell("Price", element.price, Table.number(2));
+        prodTable.cell("Stock Quantity", element.stock_quantity);
+        prodTable.newRow();
+    });
+    console.log('\033[2J'); // clears screen
+    console.log(prodTable.toString());
+    // console.log(arg.map(element => {
+    //     return `ID: ${element.item_id} Name: ${element.product_name} Price: $${element.price} Qty Left: ${element.stock_quantity}`
+    // }).join("\n"));
     goHome();
 }
 
