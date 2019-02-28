@@ -44,17 +44,7 @@ const exitApp = () => {
     })
 }
 
-const viewProducts= (callback) => {
-    const queryStr = "SELECT * FROM products";
-    connection.query(queryStr, function (err, response) {
-        if (err) throw err;
-        // callback(); // CALLBACK
-        products = response; // assign to global variable
-        callback(response);
-    });
-}
-
-function showProducts(arg) {
+function tableGenerator(arg, callback) {
     let prodTable = new Table;
     arg.forEach(element => {
         prodTable.cell("Item ID", element.item_id);
@@ -65,18 +55,58 @@ function showProducts(arg) {
     });
     console.log('\033[2J'); // clears screen
     console.log(prodTable.toString());
-    // console.log(arg.map(element => {
-    //     return `ID: ${element.item_id} Name: ${element.product_name} Price: $${element.price} Qty Left: ${element.stock_quantity}`
-    // }).join("\n"));
-    goHome();
+    callback();
 }
 
-function viewLowInventory() {
+const viewProducts = (callback) => {
+    const queryStr = "SELECT * FROM products";
+    connection.query(queryStr, function (err, response) {
+        if (err) throw err;
+        products = response; // assign to global variable
+        callback(response, goHome);
+    });
+}
+
+
+function viewLowInventory(callback) {
     // show inventory where QTY <= 5
+    const queryStr = "SELECT * FROM products WHERE stock_quantity <= 5";
+    connection.query(queryStr, function (err, response) {
+        if (err) throw err;
+        products = response; // assign to global variable
+        callback(response, goHome);
+    });
 }
 
 function addToInventory() {
     // increase QTY of specific product
+    inquirer.prompt([
+        {
+            type: input,
+            name: 'itemID',
+            message: 'Please enter the Item ID you wish to add more of: ',
+            validate: value => {
+                if (isNaN(value) === false) {
+                    return true;
+                }
+                return "Please enter a number!";
+            }
+        }
+        {
+            type: input,
+            name: 'itemID',
+            message: 'Please enter the Item ID you wish to add more of: ',
+            validate: value => {
+                if (isNaN(value) === false) {
+                    return true;
+                }
+                return "Please enter a number!";
+            }
+        }
+    ]).then(answers => {
+        const currentID = parseInt(answers.itemID);
+        //
+    })
 }
 
 function addNewProduct() {
@@ -90,16 +120,16 @@ function mainMenu() {
         switch (answers.menu) {
 
             case 'View Products For Sale':
-                viewProducts(showProducts)
+                viewProducts(tableGenerator);
                 break;
             case 'View Low Inventory':
-                viewLowInventory(goHome)
+                viewLowInventory(tableGenerator);
                 break;
             case 'Add to Inventory':
-                addToInventory(goHome)
+                addToInventory();
                 break;
             case 'Add New Product':
-                addNewProduct(goHome)
+                addNewProduct(goHome);
                 break;
             case 'Quit':
                 exitApp();

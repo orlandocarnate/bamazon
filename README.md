@@ -7,6 +7,7 @@ An Amazon-like storefront using MySQL. The app will take in orders from customer
 * [MySQL](https://www.npmjs.com/package/mysql) Node module is a driver for MySQL. 
 * [Inquirer](https://www.npmjs.com/package/inquirer) Node module prompts the user. A command line interface (CLI)
 * [Easy Table](https://www.npmjs.com/package/easy-table) Node module for formatting tables in the console.
+* [CLI table](https://www.npmjs.com/package/cli-table) Another Table alternative for the CLI.
 
 
 ### Regular Expressions
