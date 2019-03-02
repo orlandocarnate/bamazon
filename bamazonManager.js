@@ -15,13 +15,6 @@ const config = {
 // ESTABLISH CONNECTION object
 var connection = mysql.createConnection(config);
 
-var menu = {
-    type: 'list',
-    name: 'menu',
-    message: 'What would you like to do?',
-    choices: ['View Products For Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product', 'Quit']
-};
-
 // ----- CRUD FUNCTIONS ----- \\
 
 const viewProducts = (callback) => {
@@ -29,7 +22,7 @@ const viewProducts = (callback) => {
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
         products = response; // assign to global variable
-        callback(response, goHome); // Callback = tableGenerator()
+        callback(response, mainMenu); // Callback = tableGenerator()
     });
 }
 
@@ -39,7 +32,7 @@ const viewLowInventory = (callback) => {
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
         products = response; // assign to global variable
-        callback(response, goHome); // callback = tableGenerator()
+        callback(response, mainMenu); // callback = tableGenerator()
     });
 }
 
@@ -64,7 +57,7 @@ const updateSingleItem = (currentID, currentQTY, callback) => {
     connection.query(queryStr, [currentQTY, currentID], function (err, response) {
         if (err) throw err;
         console.log(response.message);
-        callback(); // CALLBACK -> goHome()
+        callback(); // CALLBACK -> mainMenu()
     });
 }
 
@@ -79,7 +72,7 @@ const insertItem = (product_name, department_name, price, stock_quantity, callba
     connection.query(queryStr, newitem, function (err, response) {
         if (err) throw err;
         console.log(response.message);
-        callback(); // CALLBACK -> goHome()
+        callback(); // CALLBACK -> mainMenu()
     });
 }
 
@@ -88,6 +81,7 @@ const insertItem = (product_name, department_name, price, stock_quantity, callba
 
 // ----- TABLE GENERATORS ----- \\
 const tableGenerator = (arg, callback) => {
+    console.log('\033[2J'); // clears screen
     let prodTable = new Table;
     arg.forEach(element => {
         prodTable.cell("Item ID", element.item_id);
@@ -98,10 +92,11 @@ const tableGenerator = (arg, callback) => {
     });
     console.log('\033[2J'); // clears screen
     console.log(prodTable.toString());
-    callback(); // callback = goHome()
+    callback(); // callback = mainMenu()
 }
 
 const singleItemTable = (arg, callback) => {
+    console.log('\033[2J'); // clears screen
     const total = order.price * currentQTY;
     let prodTable = new Table;
     prodTable.cell("Item ID", arg.item_id);
@@ -146,11 +141,11 @@ const updateInventoryPrompt = (prodArray, callback) => {
         addQty = parseInt(answers.itemQty);
         console.log(answers);
         console.log(`ID: ${currentID}, Qty to add: ${addQty}`);
-        callback(currentID, addQty, goHome); // call updateSingleItem()
+        callback(currentID, addQty, mainMenu); // call updateSingleItem()
     })
 }
 
-const insertNewProduct = (callback) => {
+const insertPrompt = (callback) => {
     // INSERT INTO a new product.
     let currentID;
     let addQty;
@@ -191,12 +186,18 @@ const insertNewProduct = (callback) => {
         currentID = parseInt(answers.itemID);
         addQty = parseInt(answers.itemQty);
         console.log(`New item you are adding:\nName: ${answers.product_name}, Dept: ${answers.department_name}, Price: $${answers.price}, Stock Qty: ${answers.stock_quantity}`);
-        callback(answers.product_name, answers.department_name, parseInt(answers.price), parseInt(answers.stock_quantity), goHome); // call updateSingleItem()
+
+        callback(answers.product_name, answers.department_name, parseFloat(answers.price), parseInt(answers.stock_quantity), mainMenu); // call updateSingleItem()
     })
 }
 
 const mainMenu = () => {
-    console.log('\033[2J'); // clears screen
+    const menu = {
+        type: 'list',
+        name: 'menu',
+        message: 'What would you like to do?',
+        choices: ['View Products For Sale', 'View Low Inventory', 'Update Inventory', 'Add New Product', 'Quit']
+    };
     inquirer.prompt(menu).then(answers => {
         // console.log(answers);
         switch (answers.menu) {
@@ -207,33 +208,33 @@ const mainMenu = () => {
             case 'View Low Inventory':
                 viewLowInventory(tableGenerator);
                 break;
-            case 'Add to Inventory':
+            case 'Update Inventory':
                 updateInventoryList(updateInventoryPrompt); // SQL SELECT *, then set callback to UpdatePrompt
                 break;
             case 'Add New Product':
-                insertNewProduct(insertItem);
+                insertPrompt(insertItem);
                 break;
             case 'Quit':
-                goHome();
+                exitApp();
                 break;
         }
     });
 }
 
-const goHome = () => {
+const exitApp = () => {
     inquirer.prompt([
         {
             type: 'confirm',
-            name: 'gohome',
-            message: '(Y) for Menu, (N) to Quit: ',
-            default: true
+            name: 'exitapp',
+            message: 'Are you sure you want to quit?',
+            default: false
         }
     ]).then(answers => {
-        if (answers.gohome) {
-            mainMenu();
-        } else {
+        if (answers.exitapp) {
             console.log("Goodbye!");
             connection.end();// end connection
+        } else {
+            mainMenu();
         }
     })
 }

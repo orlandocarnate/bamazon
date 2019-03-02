@@ -9,6 +9,18 @@ An Amazon-like storefront using MySQL. The app will take in orders from customer
 * [Easy Table](https://www.npmjs.com/package/easy-table) Node module for formatting tables in the console.
 * [CLI table](https://www.npmjs.com/package/cli-table) Another Table alternative for the CLI.
 
+## SQL Commands
+* `SELECT * FROM products` - shows all the items in the products table.
+* `UPDATE products SET stock_quantity = stock_quantity + ? WHERE item_id = ?` - updates the quatity of the selected item by item ID
+* INSERT INTO products SET - adds a new item
+
+```
+ALTER TABLE table_name ADD column_name datatype --add column
+ALTER TABLE table_name DROP COLUMN column_name --delete column
+ALTER TABLE table_name ALTER COLUMN column_name datatype --SQL Server
+ALTER TABLE table_name MODIFY COLUMN column_name datatype --MySQL
+ALTER TABLE table_name MODIFY column_name datatype --Oracle 10G+
+```
 
 ## Programmer's Notes
 * Inquirer can have paginated lists

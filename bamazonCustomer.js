@@ -66,8 +66,8 @@ const getAll = () => {
 
 // MYSQL Update
 const updateProduct = (callback) => {
-    const queryStr = "UPDATE products SET stock_quantity = stock_quantity - ? WHERE item_id = ?";
-    connection.query(queryStr, [currentQTY, currentID], function (err, response) {
+    const queryStr = "UPDATE products SET stock_quantity = stock_quantity - ?, product_sales = product_sales + price*? WHERE item_id = ?";
+    connection.query(queryStr, [currentQTY, currentQTY, currentID], function (err, response) {
         if (err) throw err;
         callback(response.message); // CALLBACK
     });
