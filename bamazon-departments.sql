@@ -30,3 +30,14 @@ ALTER TABLE products DROP COLUMN department_name;
 
 -- make department_name NOT NULL in product table.
 ALTER TABLE products MODIFY department_id INT NOT NULL;
+
+ALTER TABLE departments MODIFY over_head_costs DECIMAL(10,2);
+
+-- add over head costs to each department
+UPDATE departments SET over_head_costs = 50000 WHERE department_id = 1;
+UPDATE departments SET over_head_costs = 90000 WHERE department_id = 2;
+UPDATE departments SET over_head_costs = 100000 WHERE department_id = 3;
+UPDATE departments SET over_head_costs = 500000 WHERE department_id = 4;
+UPDATE departments SET over_head_costs = 400000 WHERE department_id = 5;
+UPDATE departments SET over_head_costs = 30000 WHERE department_id = 6;
+UPDATE departments SET over_head_costs = 60000 WHERE department_id = 7;

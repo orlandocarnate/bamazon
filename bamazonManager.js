@@ -1,7 +1,8 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var Table = require('easy-table');
-let prod;
+var figlet = require('figlet');
+const chalk = require('chalk');
 
 // MySQL Config
 const config = {
@@ -15,188 +16,213 @@ const config = {
 // ESTABLISH CONNECTION object
 var connection = mysql.createConnection(config);
 
+// ----- ALL ITEMS TABLE GENERATORS ----- \\
+const tableGenerator = (arg, callback) => {
+
+}
+
 // ----- CRUD FUNCTIONS ----- \\
 
-const viewProducts = (callback) => {
-    const queryStr = "SELECT * FROM products";
+const viewInventory = () => {
+    console.log('\033[2J'); // clears screen
+    console.log(chalk.yellow(figlet.textSync('All Inventory', { font: 'Small Slant' })));
+    const queryStr = `
+    SELECT 
+    item_id, 
+    product_name,
+    price,
+    stock_quantity,
+    CAST(product_sales AS DECIMAL(6,2)) AS sales 
+    FROM products
+    `;
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
-        products = response; // assign to global variable
-        callback(response, mainMenu); // Callback = tableGenerator()
+        response; // assign to global variable
+        let prodTable = new Table;
+        response.forEach(element => {
+            prodTable.cell("Item ID", element.item_id);
+            prodTable.cell("Product Name", element.product_name);
+            prodTable.cell("Price", element.price, Table.number(2));
+            prodTable.cell("Stock Quantity", element.stock_quantity);
+            prodTable.cell("Product Sales", element.sales, Table.number(2));
+            prodTable.newRow();
+        });
+        console.log(prodTable.toString());
+        goHome();
     });
 }
 
 const viewLowInventory = (callback) => {
+    console.log('\033[2J'); // clears screen
+    console.log(chalk.yellow(figlet.textSync('Low Inventory', { font: 'Small Slant' })));
     // show inventory where QTY <= 5
-    const queryStr = "SELECT * FROM products WHERE stock_quantity <= 5";
+    const queryStr = `
+    SELECT 
+    item_id, 
+    product_name,
+    price,
+    stock_quantity,
+    CAST(product_sales AS DECIMAL(6,2)) AS sales 
+    FROM products
+    WHERE stock_quantity <= 5`;
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
-        products = response; // assign to global variable
-        callback(response, mainMenu); // callback = tableGenerator()
+        let prodTable = new Table;
+        response.forEach(element => {
+            prodTable.cell("Item ID", element.item_id);
+            prodTable.cell("Product Name", element.product_name);
+            prodTable.cell("Price", element.price, Table.number(2));
+            prodTable.cell("Stock Quantity", element.stock_quantity);
+            prodTable.cell("Product Sales", element.sales, Table.number(2));
+            prodTable.newRow();
+        });
+        console.log(prodTable.toString());
+        goHome();
     });
 }
 
-const updateInventoryList = (callback) => {
-    // get all the products
-    const queryStr = "SELECT * FROM products";
+const updateInventoryList = () => {
+    console.log('\033[2J'); // clears screen
+    console.log(chalk.yellow(figlet.textSync('Update Inventory', { font: 'Small Slant' })));
+    // get all the products to insert as a list of choices
+    const queryStr = "SELECT item_id, product_name FROM products";
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
+        // create array of objects with name and value as keys
         const prodArray = response.map(element => {
             let obj = {};
             obj.name = element.product_name;
             obj.value = element.item_id
             return obj
         });
-        //
-        callback(prodArray, updateSingleItem); // Callback = updateInventoryPrompt()
+        // pass prodArray as list of choices
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'itemID',
+                message: 'Please select from the list that you would like to add more of.\n',
+                paginated: true,
+                choices: prodArray
+            },
+            {
+                type: 'input',
+                name: 'itemQty',
+                message: 'How much would you like to add? ',
+                validate: value => {
+                    if (isNaN(value) === false && value > 0) {
+                        return true;
+                    }
+                    return "Please enter a number!";
+                }
+            }
+        ]).then(answers => {
+            const currentID = parseInt(answers.itemID);
+            const addQty = parseInt(answers.itemQty);
+            // console.log(`ID: ${currentID}, Qty to add: ${addQty}`);
+            updateSingleItem(currentID, addQty); // update single item
+        })
     });
 }
 
-const updateSingleItem = (currentID, currentQTY, callback) => {
+const updateSingleItem = (currentID, currentQTY) => {
     const queryStr = "UPDATE products SET stock_quantity = stock_quantity + ? WHERE item_id = ?";
     connection.query(queryStr, [currentQTY, currentID], function (err, response) {
         if (err) throw err;
         console.log(response.message);
-        callback(); // CALLBACK -> mainMenu()
+        goHome();
     });
 }
 
-const insertItem = (product_name, department_name, price, stock_quantity, callback) => {
+// ADD NEW ITEM
+const insertPrompt = () => {
+    console.log(chalk.yellow(figlet.textSync('Add New item', { font: 'Small Slant' })));
+    // get list of existing deparments
+    const queryStr = "SELECT department_id, department_name FROM departments";
+    connection.query(queryStr, function (err, response) {
+        if (err) throw err;
+        console.log(response);
+        // create array of objects with name and value as keys
+        const deptArray = response.map(dept => {
+            let obj = {};
+            obj.value = dept.department_id;
+            obj.name = `[ID: ${dept.department_id}] ${dept.department_name}`;
+            return obj
+        });
+        // pass deptArray as list of choices
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'department_id',
+                message: 'Please select a department from the list.\n',
+                paginated: true,
+                choices: deptArray
+            },
+            {
+                type: 'input',
+                name: 'product_name',
+                message: 'Please enter a product name: ',
+            },
+            {
+                type: 'input',
+                name: 'price',
+                message: 'Enter price:',
+                validate: value => {
+                    if (isNaN(value) === false && value > 0) {
+                        return true;
+                    }
+                    return "Please enter a number!";
+                }
+            },
+            {
+                type: 'input',
+                name: 'stock_quantity',
+                message: 'Enter initial stock quantity:',
+                validate: value => {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return "Please enter a number!";
+                }
+            }
+        ]).then(answers => {
+            const department_id = parseInt(answers.department_id);
+            const product_name = answers.product_name;
+            const price = parseFloat(answers.price);
+            const stock_quantity = parseInt(answers.stock_quantity);
+            // 
+            insertItem(department_id, product_name, price, stock_quantity); // update single item
+        })
+
+    });
+}
+// SQL INSERT/CREATE
+const insertItem = (department_id, product_name, price, stock_quantity) => {
     const queryStr = "INSERT INTO products SET ?";
     const newitem = [{
         product_name: product_name,
-        department_name: department_name,
+        department_id: department_id,
         price: price,
         stock_quantity: stock_quantity
     }]
     connection.query(queryStr, newitem, function (err, response) {
         if (err) throw err;
         console.log(response.message);
-        callback(); // CALLBACK -> mainMenu()
+        console.log(product_name.toUpperCase() + " has been added!");
+        goHome();
     });
-}
-
-// ----- END CRUD FUNCTIONS ----- \\
-
-
-// ----- TABLE GENERATORS ----- \\
-const tableGenerator = (arg, callback) => {
-    console.log('\033[2J'); // clears screen
-    let prodTable = new Table;
-    arg.forEach(element => {
-        prodTable.cell("Item ID", element.item_id);
-        prodTable.cell("Product Name", element.product_name);
-        prodTable.cell("Price", element.price, Table.number(2));
-        prodTable.cell("Stock Quantity", element.stock_quantity);
-        prodTable.cell("Product Sales", element.product_sales);
-        prodTable.newRow();
-    });
-    console.log('\033[2J'); // clears screen
-    console.log(prodTable.toString());
-    callback(); // callback = mainMenu()
-}
-
-const singleItemTable = (arg, callback) => {
-    console.log('\033[2J'); // clears screen
-    const total = order.price * currentQTY;
-    let prodTable = new Table;
-    prodTable.cell("Item ID", arg.item_id);
-    prodTable.cell("Product Name", arg.product_name);
-    prodTable.cell("Price", arg.price, Table.number(2));
-    // prodTable.cell("Stock Quantity", arg.stock_quantity);
-    prodTable.cell("Order Quantity", currentQTY);
-    prodTable.cell("Total Price", arg.price * currentQTY, Table.number(2));
-    prodTable.newRow();
-    console.log('\033[2J'); // clears screen
-    console.log(prodTable.toString());
-    callback();
-}
-// ----- END TABLE GENERATORS ----- \\
-
-
-// ----- INQUIRER PROMPTS ----- \\
-const updateInventoryPrompt = (prodArray, callback) => {
-    let currentID;
-    let addQty;
-    inquirer.prompt([
-        {
-            type: 'list',
-            name: 'itemID',
-            message: 'Please select from the list that you would like to add more of.\n',
-            paginated: true,
-            choices: prodArray
-        },
-        {
-            type: 'input',
-            name: 'itemQty',
-            message: 'How much would you like to add? ',
-            validate: value => {
-                if (isNaN(value) === false && value > 0) {
-                    return true;
-                }
-                return "Please enter a number!";
-            }
-        }
-    ]).then(answers => {
-        currentID = parseInt(answers.itemID);
-        addQty = parseInt(answers.itemQty);
-        console.log(answers);
-        console.log(`ID: ${currentID}, Qty to add: ${addQty}`);
-        callback(currentID, addQty, mainMenu); // call updateSingleItem()
-    })
-}
-
-const insertPrompt = (callback) => {
-    // INSERT INTO a new product.
-    let currentID;
-    let addQty;
-    inquirer.prompt([
-        {
-            type: 'input',
-            name: 'product_name',
-            message: 'Please enter a product name: ',
-        },
-        {
-            type: 'input',
-            name: 'department_name',
-            message: 'Enter department name:',
-        },
-        {
-            type: 'input',
-            name: 'price',
-            message: 'Enter price:',
-            validate: value => {
-                if (isNaN(value) === false && value > 0) {
-                    return true;
-                }
-                return "Please enter a number!";
-            }
-        },
-        {
-            type: 'input',
-            name: 'stock_quantity',
-            message: 'Enter initial stock quantity:',
-            validate: value => {
-                if (isNaN(value) === false) {
-                    return true;
-                }
-                return "Please enter a number!";
-            }
-        }
-    ]).then(answers => {
-        currentID = parseInt(answers.itemID);
-        addQty = parseInt(answers.itemQty);
-        console.log(`New item you are adding:\nName: ${answers.product_name}, Dept: ${answers.department_name}, Price: $${answers.price}, Stock Qty: ${answers.stock_quantity}`);
-
-        callback(answers.product_name, answers.department_name, parseFloat(answers.price), parseInt(answers.stock_quantity), mainMenu); // call updateSingleItem()
-    })
 }
 
 const mainMenu = () => {
+    console.log('\033[2J'); // clears screen
+    console.log(chalk.yellow(figlet.textSync('Bamazon')));
+    console.log(chalk.yellow(figlet.textSync('Manager Page')));
+    console.log(chalk.yellow(figlet.textSync('Main Menu', {font: 'Small Slant'})));
+
+    console.log("\n");
     const menu = {
         type: 'list',
         name: 'menu',
-        message: 'What would you like to do?',
+        message: 'Please select an option below:',
         choices: ['View Products For Sale', 'View Low Inventory', 'Update Inventory', 'Add New Product', 'Quit']
     };
     inquirer.prompt(menu).then(answers => {
@@ -204,41 +230,63 @@ const mainMenu = () => {
         switch (answers.menu) {
 
             case 'View Products For Sale':
-                viewProducts(tableGenerator);
+                viewInventory();
                 break;
             case 'View Low Inventory':
-                viewLowInventory(tableGenerator);
+                viewLowInventory();
                 break;
             case 'Update Inventory':
-                updateInventoryList(updateInventoryPrompt); // SQL SELECT *, then set callback to UpdatePrompt
+                updateInventoryList(); // SQL SELECT *, then set callback to UpdatePrompt
                 break;
             case 'Add New Product':
-                insertPrompt(insertItem);
+                insertPrompt();
                 break;
             case 'Quit':
-                exitApp();
+                quit();
                 break;
         }
     });
 }
 
-const exitApp = () => {
+const goHome = () => {
     inquirer.prompt([
         {
-            type: 'confirm',
-            name: 'exitapp',
-            message: 'Are you sure you want to quit?',
-            default: false
+            type: 'list',
+            name: 'menu',
+            message: 'Return to Menu or Quit?',
+            choices: ["Main Menu", "Quit"]
         }
     ]).then(answers => {
-        if (answers.exitapp) {
-            console.log("Goodbye!");
-            connection.end();// end connection
-        } else {
-            mainMenu();
+        switch (answers.menu) {
+            case 'Main Menu':
+                mainMenu();
+                break;
+            case 'Quit':
+                quit();
+                break;
         }
     })
 }
+
+const quit = () => {
+    inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'menu',
+            message: 'Are you sure you want to quit?',
+            default: true
+        }
+    ]).then(answers => {
+        if (answers.menu) {
+            console.log("Goodbye!");
+            connection.end();
+        } else {
+            mainMenu();
+        }
+
+    })
+}
+
 // ----- END INQUIRER PROMPTS ----- \\
 
 mainMenu(); // run program
