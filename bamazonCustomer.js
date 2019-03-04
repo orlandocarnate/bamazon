@@ -1,5 +1,8 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var figlet = require('figlet');
+const chalk = require('chalk');
+
 var Table = require('easy-table');
 let products; // save database response to global variable
 let order; // save selected order to global variable
@@ -25,73 +28,91 @@ const closeDB = () => {
     connection.end();
 }
 
-function showTable(arg, callback) {
-    let prodTable = new Table;
-    arg.forEach(element => {
-        prodTable.cell("Item ID", element.item_id);
-        prodTable.cell("Product Name", element.product_name);
-        prodTable.cell("Price", element.price, Table.number(2));
-        prodTable.cell("Stock Quantity", element.stock_quantity);
-        prodTable.newRow();
-    });
-    console.log('\033[2J'); // clears screen
-    console.log(prodTable.toString());
-    callback();
-}
-function showItem(arg, callback) {
+// show selected item with quantity and total price
+function showItem(item) {
     const total = order.price * currentQTY;
     let prodTable = new Table;
-        prodTable.cell("Item ID", arg.item_id);
-        prodTable.cell("Product Name", arg.product_name);
-        prodTable.cell("Price", arg.price, Table.number(2));
-        // prodTable.cell("Stock Quantity", arg.stock_quantity);
-        prodTable.cell("Order Quantity", currentQTY);
-        prodTable.cell("Total Price", arg.price*currentQTY, Table.number(2));
-        prodTable.newRow();
+    prodTable.cell("Item ID", item.item_id);
+    prodTable.cell("Product Name", item.product_name);
+    prodTable.cell("Price", item.price, Table.number(2));
+    // prodTable.cell("Stock Quantity", arg.stock_quantity);
+    prodTable.cell("Order Quantity", currentQTY);
+    prodTable.cell("Total Price", item.price * currentQTY, Table.number(2));
+    prodTable.newRow();
     console.log('\033[2J'); // clears screen
     console.log(prodTable.toString());
-    callback();
-}
-
-// MYSQL READ All items
-const getAll = () => {
-    const queryStr = "SELECT * FROM products";
-    connection.query(queryStr, function (err, response) {
-        if (err) throw err;
-        // callback(); // CALLBACK
-        products = response; // assign to global variable
-        showTable(products, buyPrompt);
-    });
-}
-
-// MYSQL Update
-const updateProduct = (callback) => {
-    const queryStr = "UPDATE products SET stock_quantity = stock_quantity - ?, product_sales = product_sales + price*? WHERE item_id = ?";
-    connection.query(queryStr, [currentQTY, currentQTY, currentID], function (err, response) {
-        if (err) throw err;
-        callback(response.message); // CALLBACK
-    });
-}
-
-const updateStatus = (arg) => {
-    console.log(arg);
-    restartPrompt();
-}
-
-const processOrder = () => {
+    // callback();
     if (currentQTY <= order.stock_quantity) {
         console.log("You ordered the proper qty.")
         // update order
-        updateProduct(updateStatus)
+        // updateProduct(updateStatus)
+        const queryStr = "UPDATE products SET stock_quantity = stock_quantity - ?, product_sales = product_sales + ( price * ? ) WHERE item_id = ?";
+        connection.query(queryStr, [currentQTY, currentQTY, item.item_id], function (err, response) {
+            if (err) throw err;
+            // callback(response.message); // CALLBACK
+            console.log(response.message);
+            restartPrompt();
+        });
     } else {
         console.log("you ordered too much!");
         restartPrompt();
     }
 }
 
+// MYSQL READ All items and show in a table
+const getAll = () => {
+    const queryStr = "SELECT * FROM products";
+    connection.query(queryStr, function (err, response) {
+        if (err) throw err;
+        // callback(); // CALLBACK
+        products = response; // assign to global variable
+
+        // generate table
+        let prodTable = new Table;
+        products.forEach(product => {
+            prodTable.cell("Item ID", product.item_id);
+            prodTable.cell("Product Name", product.product_name);
+            prodTable.cell("Price", product.price, Table.number(2));
+            prodTable.cell("Stock Quantity", product.stock_quantity);
+            prodTable.newRow();
+        });
+        // console.log('\033[2J'); // clears screen
+        console.log(prodTable.toString());
+        buyPrompt();
+    });
+}
+
 const start = () => {
     console.log('\033[2J'); // clears screen
-    getAll();
+    console.log(
+        // chalk module
+        chalk.yellow(
+            // figlet module
+            figlet.textSync('The Bamazon Store', {
+                font: 'Small Slant',
+                kerning: 'fitted',
+                horizontalLayout: 'fitted',
+                verticalLayout: 'default'
+            })
+        )
+    );
+    inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'continue',
+            message: 'Welcome to Bamazon! Press enter to continue...',
+            default: true
+        }
+
+    ]).then(answers => {
+        if (answers.continue) {
+            getAll();
+        } else {
+            console.log("Goodbye!");
+            closeDB();
+        }
+    })
+    
 }
 
 const buyPrompt = () => {
@@ -127,7 +148,7 @@ const buyPrompt = () => {
             return element.item_id === currentID
         });
         console.log(order);
-        showItem(order, processOrder);
+        showItem(order);
 
     })
 }
@@ -137,7 +158,7 @@ const restartPrompt = () => {
         {
             type: 'confirm',
             name: 'continue',
-            message: 'Do you want to order again?',
+            message: 'Would you like to continue shopping?',
             default: true
         }
 

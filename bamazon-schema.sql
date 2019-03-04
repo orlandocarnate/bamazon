@@ -1,7 +1,3 @@
-var mysql = require("mysql");
-var inquirer = require("inquirer");
-var Table = require('easy-table');
-
 DROP DATABASE IF EXISTS bamazon;
 
 CREATE DATABASE bamazon;
@@ -16,12 +12,14 @@ CREATE TABLE products (
  stock_quantity INTEGER(6)
 );
 
--- For bamazonSupervisor.js
-CREATE TABLE departments (
-    department_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    department_name VARCHAR(60),
-    over_head_costs DECIMAL(6,2)
-);
-
--- add column
+-- add product_sales column
 ALTER TABLE products ADD product_sales DECIMAL(6,2);
+
+UPDATE products SET product_sales = 0;
+
+SELECT * FROM products;
+
+SELECT 
+department_id, department_name, overhead_costs, price*stock_quantity AS prod_sales, 
+prod_sales-overhead_costs AS total_profit 
+FROM products;

@@ -26,6 +26,7 @@ const viewSingleDept = (callback) => {
         callback(response, mainMenu); // callback = tableGenerator()
     });
 }
+
 // Create New Department
 
 

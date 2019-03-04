@@ -88,6 +88,7 @@ const tableGenerator = (arg, callback) => {
         prodTable.cell("Product Name", element.product_name);
         prodTable.cell("Price", element.price, Table.number(2));
         prodTable.cell("Stock Quantity", element.stock_quantity);
+        prodTable.cell("Product Sales", element.product_sales);
         prodTable.newRow();
     });
     console.log('\033[2J'); // clears screen
