@@ -30,10 +30,13 @@ const viewInventory = () => {
     SELECT 
     item_id, 
     product_name,
+    departments.department_name AS department,
     price,
     stock_quantity,
     CAST(product_sales AS DECIMAL(6,2)) AS sales 
     FROM products
+    INNER JOIN departments
+    ON products.department_id = departments.department_id
     `;
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
@@ -42,8 +45,9 @@ const viewInventory = () => {
         response.forEach(element => {
             prodTable.cell("Item ID", element.item_id);
             prodTable.cell("Product Name", element.product_name);
+            prodTable.cell("Department", element.department);
             prodTable.cell("Price", element.price, Table.number(2));
-            prodTable.cell("Stock Quantity", element.stock_quantity);
+            prodTable.cell("Stock Qty", element.stock_quantity);
             prodTable.cell("Product Sales", element.sales, Table.number(2));
             prodTable.newRow();
         });
@@ -118,7 +122,6 @@ const updateInventoryList = () => {
         ]).then(answers => {
             const currentID = parseInt(answers.itemID);
             const addQty = parseInt(answers.itemQty);
-            // console.log(`ID: ${currentID}, Qty to add: ${addQty}`);
             updateSingleItem(currentID, addQty); // update single item
         })
     });
@@ -140,7 +143,6 @@ const insertPrompt = () => {
     const queryStr = "SELECT department_id, department_name FROM departments";
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
-        console.log(response);
         // create array of objects with name and value as keys
         const deptArray = response.map(dept => {
             let obj = {};
