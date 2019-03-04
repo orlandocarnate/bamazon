@@ -37,6 +37,7 @@ const viewInventory = () => {
     FROM products
     INNER JOIN departments
     ON products.department_id = departments.department_id
+    ORDER BY department
     `;
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
