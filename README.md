@@ -1,13 +1,13 @@
 # bamazon
-An Amazon-like storefront using MySQL. The app will take in orders from customers and deplete stock from the store's inventory.
+An Amazon-like storefront usingNode.js for the Command Line Interface and MySQL for the database. The app will take in orders from customers and deplete stock from the store's inventory.
 
 ## Technology Used
-* Node.js
-* MySQL
-* [MySQL](https://www.npmjs.com/package/mysql) Node module is a driver for MySQL. 
-* [Inquirer](https://www.npmjs.com/package/inquirer) Node module prompts the user. A command line interface (CLI)
-* [Easy Table](https://www.npmjs.com/package/easy-table) Node module for formatting tables in the console.
-* [CLI table](https://www.npmjs.com/package/cli-table) Another Table alternative for the CLI.
+* [Node.js](https://nodejs.org/)
+* [MySQL database](https://www.mysql.com/)
+* [MySQL module](https://www.npmjs.com/package/mysql) Node module is a driver for MySQL. 
+* [Inquirer module](https://www.npmjs.com/package/inquirer) Node module prompts the user. A command line interface (CLI)
+* [Easy Table module](https://www.npmjs.com/package/easy-table) Node module for formatting tables in the console.
+* [CLI table module](https://www.npmjs.com/package/cli-table) Another Table alternative for the CLI.
 
 ## How the storefront works
 ### `bamazonCustomer.js`
@@ -18,7 +18,11 @@ User then enters the Item ID and quantity. I made sure to validate each entry so
 ![Customer Section 2](/assets/customer-2.JPG)
 
 ### `bamazonManager.js`
-The Manager program starts 4 choices: View Products for Sale, View Low Inventory (of less than 5), Update Inventory, and Add New Product.
+The Manager program starts with 4 choices: 
+    * View Products for Sale
+    * View Low Inventory (of less than 5)
+    * Update Inventory
+    * Add New Product.
 ![Customer Page](/assets/manager-1.JPG)
 
 View Products for Sale section:
