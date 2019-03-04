@@ -12,42 +12,42 @@ An Amazon-like storefront using MySQL. The app will take in orders from customer
 ## How the storefront works
 ### `bamazonCustomer.js`
 This program starts with loading the screen with the current list of items available to buy.
-![Customer Section 1](/assets/customer-1.jpg)
+![Customer Section 1](/assets/customer-1.JPG)
 
 User then enters the Item ID and quantity. I made sure to validate each entry so that the ID is valid and a number, and that the quantity greater than 0 and less than or equal to the item's stock quantity.
-![Customer Section 2](/assets/customer-2.jpg)
+![Customer Section 2](/assets/customer-2.JPG)
 
 ### `bamazonManager.js`
 The Manager program starts 4 choices: View Products for Sale, View Low Inventory (of less than 5), Update Inventory, and Add New Product.
-![Customer Page](/assets/manager-1.jpg)
+![Customer Page](/assets/manager-1.JPG)
 
 View Products for Sale section:
-![Manager View Inventory](/assets/manager-allinventory.jpg)
+![Manager View Inventory](/assets/manager-allinventory.JPG)
 
 View Low Inventory section shows all items that have 5 or less stock quantity:
-![Manager View Low Inventory](/assets/manager-low-inv.jpg)
+![Manager View Low Inventory](/assets/manager-low-inv.JPG)
 
 Update Inventory section first shows a list of current items taken from the database table. Then you can add more stock.
-![Manager Update Inventory](/assets/manager-update-stock.jpg)
+![Manager Update Inventory](/assets/manager-update-stock.JPG)
 
 Add New Product section lets you first select from a list the current departments available. 
-![Manager Add New Product 1](/assets/manager-insert-1.jpg)
+![Manager Add New Product 1](/assets/manager-insert-1.JPG)
 
 Then it asks for a new product name, price, and stock quantity. Then answers are INSERT INTO products table with a primary key automatically generated.
-![CManager Add New Product 2](/assets/manager-insert-2.jpg)
+![CManager Add New Product 2](/assets/manager-insert-2.JPG)
 
 ### `bamazonSupervisor.js`
 The Supervisor main menu gives you two choices: View Product Sales by Department and Create a New Department. 
-![Supervisor Main section](/assets/supervisor-main.jpg)
+![Supervisor Main section](/assets/supervisor-main.JPG)
 
 The View Product Sales by Department menu lets you choose a department from a paginated list. 
-![Supervisor View Product Sales](/assets/supervisor-dept1.jpg)
+![Supervisor View Product Sales](/assets/supervisor-dept1.JPG)
 
 Results from the **video games** department: 
-![Supervisor View Product Sales 2](/assets/supervisor-dept2.jpg)
+![Supervisor View Product Sales 2](/assets/supervisor-dept2.JPG)
 
 Create a New Department asks you to enter a new department name and overhead costs.
-![Supervisor Add New Department](/assets/supervisor-dept2.jpg)
+![Supervisor Add New Department](/assets/supervisor-dept2.JPG)
 
 
 ## SQL Commands
