@@ -18,14 +18,15 @@ var connection = mysql.createConnection(config);
 
 // show list of existing departments to select from
 const viewAllDept = () => {
-    // show inventory where QTY <= 5
+    console.log('\033[2J'); // clears screen
+    console.log(chalk.yellow(figlet.textSync('Department Page', { font: 'Small Slant' })));
     const queryStr = 'SELECT department_id, department_name FROM departments';
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
         const deptArray = response.map(dept => {
             let obj = {};
             obj.name = dept.department_name;
-            obj.value = dept.department_id
+            obj.value = dept.department_id;
             return obj
         });
         const menu = {
@@ -43,7 +44,8 @@ const viewAllDept = () => {
 }
 
 const viewSingleDept = (id) => {
-    // show inventory where QTY <= 5
+    console.log('\033[2J'); // clears screen
+    console.log(chalk.yellow(figlet.textSync('Department Page', { font: 'Small Slant' })));
     const queryStr = `
     SELECT products.department_id, 
         departments.department_name, 
@@ -69,89 +71,57 @@ const viewSingleDept = (id) => {
         });
         console.log('\033[2J'); // clears screen
         console.log(prodTable.toString());
-        mainMenu(); // callback = mainMenu()
+        goHome(); // callback = mainMenu()
     });
 }
 
 // ADD NEW ITEM
 const insertDept = () => {
-    console.log(chalk.yellow(figlet.textSync('Add Department item', { font: 'Small Slant' })));
-    // get list of existing deparments
-    const queryStr = "SELECT department_id, department_name FROM departments";
-    connection.query(queryStr, function (err, response) {
-        if (err) throw err;
-        console.log(response);
-        // create array of objects with name and value as keys
-        const deptArray = response.map(dept => {
-            let obj = {};
-            obj.value = dept.department_id;
-            obj.name = `[ID: ${dept.department_id}] ${dept.department_name}`;
-            return obj
-        });
-        // pass deptArray as list of choices
-        inquirer.prompt([
-            {
-                type: 'list',
-                name: 'department_id',
-                message: 'Please select a department from the list.\n',
-                paginated: true,
-                choices: deptArray
-            },
-            {
-                type: 'input',
-                name: 'product_name',
-                message: 'Please enter a product name: ',
-            },
-            {
-                type: 'input',
-                name: 'price',
-                message: 'Enter price:',
-                validate: value => {
-                    if (isNaN(value) === false && value > 0) {
-                        return true;
-                    }
-                    return "Please enter a number!";
+    console.log('\033[2J'); // clears screen
+    console.log(chalk.yellow(figlet.textSync('Add New Department', { font: 'Small Slant' })));
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'department_name',
+            message: 'Please enter a new department name: '
+        },
+        {
+            type: 'input',
+            name: 'over_head_costs',
+            message: 'Please enter overhead cost: ',
+            validate: value => {
+                if (isNaN(value) === false) {
+                    return true;
                 }
-            },
-            {
-                type: 'input',
-                name: 'stock_quantity',
-                message: 'Enter initial stock quantity:',
-                validate: value => {
-                    if (isNaN(value) === false) {
-                        return true;
-                    }
-                    return "Please enter a number!";
-                }
+                return "Please enter a number!";
             }
-        ]).then(answers => {
-            const department_id = parseInt(answers.department_id);
-            const product_name = answers.product_name;
-            const price = parseFloat(answers.price);
-            const stock_quantity = parseInt(answers.stock_quantity);
-            // 
-            insertItem(department_id, product_name, price, stock_quantity); // update single item
-        })
-
-    });
+        }
+    ]).then(answers => {
+        const department_name = answers.department_name;
+        const over_head_costs = parseFloat(answers.over_head_costs);
+        // 
+        insertItem(department_name, over_head_costs); // update single item
+    })
 }
+
 // SQL INSERT/CREATE
-const insertItem = (department_id, product_name, price, stock_quantity) => {
-    const queryStr = "INSERT INTO products SET ?";
+const insertItem = (department_name, over_head_costs) => {
+    const queryStr = "INSERT INTO departments SET ?";
     const newitem = [{
-        product_name: product_name,
-        department_id: department_id,
-        price: price,
-        stock_quantity: stock_quantity
+        department_name: department_name.trim(),
+        over_head_costs: over_head_costs
     }]
     connection.query(queryStr, newitem, function (err, response) {
         if (err) throw err;
-        console.log(response.message);
-        console.log(product_name.toUpperCase() + " has been added!");
+        console.log(department_name.toUpperCase() + " has been added!\n" + response.message);
         goHome();
     });
 }
 const mainMenu = () => {
+    console.log('\033[2J'); // clears screen
+    console.log(chalk.yellow(figlet.textSync('Bamazon')));
+    console.log(chalk.yellow(figlet.textSync('Supervisor Page')));
+    console.log(chalk.yellow(figlet.textSync('Main Menu', { font: 'Small Slant' })));
     const menu = {
         type: 'list',
         name: 'menu',
@@ -172,6 +142,26 @@ const mainMenu = () => {
                 break;
         }
     });
+}
+
+const goHome = () => {
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'menu',
+            message: 'Return to Menu or Quit?',
+            choices: ["Main Menu", "Quit"]
+        }
+    ]).then(answers => {
+        switch (answers.menu) {
+            case 'Main Menu':
+                mainMenu();
+                break;
+            case 'Quit':
+                quit();
+                break;
+        }
+    })
 }
 
 const quit = () => {

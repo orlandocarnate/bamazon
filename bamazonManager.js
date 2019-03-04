@@ -92,7 +92,7 @@ const updateInventoryList = () => {
         const prodArray = response.map(element => {
             let obj = {};
             obj.name = element.product_name;
-            obj.value = element.item_id
+            obj.value = element.item_id;
             return obj
         });
         // pass prodArray as list of choices
