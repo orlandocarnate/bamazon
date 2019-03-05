@@ -17,6 +17,15 @@ This program starts with loading the screen with the current list of items avail
 User then enters the Item ID and quantity. I made sure to validate each entry so that the ID is valid and a number, and that the quantity greater than 0 and less than or equal to the item's stock quantity.
 ![Customer Section 2](/assets/customer-2.JPG)
 
+#### SQL commands used:
+* `SELECT * FROM products` gets all the products from the product table
+* Once the order has been entered, the product table is updated with the following SQL commands:
+```
+UPDATE products 
+SET stock_quantity = stock_quantity - ?, product_sales = product_sales + ( price * ? ) 
+WHERE item_id = ?
+```
+
 ### `bamazonManager.js`
 The Manager program starts with 4 choices: 
     * View Products for Sale
@@ -40,6 +49,23 @@ Add New Product section lets you first select from a list the current department
 Then it asks for a new product name, price, and stock quantity. Then answers are INSERT INTO products table with a primary key automatically generated.
 ![CManager Add New Product 2](/assets/manager-insert-2.JPG)
 
+#### SQL commands used:
+* An `INNER JOIN` and `ON products.department_id = departments.department_id` was used to join the `product` and `departments` table by their IDs.
+* `CAST()` was used to display product_sales in decimal form at two decimal places.
+* `ORDER BY` was used to sort the table by department
+```
+SELECT 
+item_id, product_name,
+departments.department_name AS department,
+price,
+stock_quantity,
+CAST(product_sales AS DECIMAL(6,2)) AS sales 
+FROM products
+INNER JOIN departments
+ON products.department_id = departments.department_id
+ORDER BY department
+```
+
 ### `bamazonSupervisor.js`
 The Supervisor main menu gives you two choices: View Product Sales by Department and Create a New Department. 
 ![Supervisor Main section](/assets/supervisor-main.JPG)
@@ -53,8 +79,25 @@ Results from the **video games** department:
 Create a New Department asks you to enter a new department name and overhead costs.
 ![Supervisor Add New Department](/assets/supervisor-dept2.JPG)
 
+#### SQL commands used
+To get the total profits, the product and department tables needed to be joined so that the sum of the product sales by department is subtracted by the department overhead.
+    * `SUM(products.product_sales)-departments.over_head_costs AS total_profit`
+```
+SELECT products.department_id, 
+    departments.department_name, 
+    departments.over_head_costs, 
+    SUM(products.product_sales) AS product_sales, 
+    SUM(products.product_sales)-departments.over_head_costs AS total_profit
+FROM products 
+INNER JOIN departments
+ON products.department_id = departments.department_id
+WHERE departments.department_id = ?
+GROUP BY departments.department_name;
+```
+
 
 ## SQL Commands
+
 * `SELECT * FROM products` - shows all the items in the products table.
 * `UPDATE products SET stock_quantity = stock_quantity + ? WHERE item_id = ?` - updates the quatity of the selected item by item ID
 * INSERT INTO products SET - adds a new item

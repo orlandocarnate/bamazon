@@ -40,7 +40,7 @@ function orderItem(item, qty) {
     const queryStr = "UPDATE products SET stock_quantity = stock_quantity - ?, product_sales = product_sales + ( price * ? ) WHERE item_id = ?";
     connection.query(queryStr, [qty, qty, item.item_id], function (err, response) {
         if (err) throw err;
-        console.log("Thanks for your order!\n",response.message);
+        console.log("Thanks for your order!\n", response.message);
         restartPrompt();
     });
 }
@@ -53,7 +53,6 @@ const getAll = () => {
         if (err) throw err;
         // get an array of ID's to be used to see if the item that the user ordered exists.
         const idArray = response.map(item => item.item_id);
-        // const qtyArray = response.map(item => item.stock_quantity)
         // generate table
         let prodTable = new Table;
         response.forEach(product => {
@@ -63,7 +62,6 @@ const getAll = () => {
             prodTable.cell("Stock Quantity", product.stock_quantity);
             prodTable.newRow();
         });
-        // console.log('\033[2J'); // clears screen
         console.log(prodTable.toString());
 
         // get ID first to determine the quantity
@@ -105,12 +103,11 @@ const getAll = () => {
             ]).then(answers => {
                 const qty = parseInt(answers.qty);
                 const item = response.find(item => {
-                    // console.log(element, currentID);
                     return item.item_id === currentID
                 });
                 console.log(`Current ID: ${currentID}, Current QTY: ${qty}`);
                 orderItem(item, qty);
-    
+
             })
         });
     });
