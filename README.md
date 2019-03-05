@@ -10,9 +10,9 @@ An Amazon-like storefront usingNode.js for the Command Line Interface and MySQL 
 * [CLI table module](https://www.npmjs.com/package/cli-table) Another Table alternative for the CLI.
 
 ## SQL Schema and Seeds for the product and department table
-[SQL Product Table Schema](/SQL/bamazon-schema.sql)
-[SQL Department Table Schema](/SQL/bamazon-departments.sql)
-[Sample Seeds](/SQL/bamazon-seeds.sql)
+* [SQL Product Table Schema](/SQL/bamazon-schema.sql)
+* [SQL Department Table Schema](/SQL/bamazon-departments.sql)
+* [Sample Seeds](/SQL/bamazon-seeds.sql)
 
 ## How the storefront works
 ### `bamazonCustomer.js`
