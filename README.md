@@ -9,6 +9,8 @@ An Amazon-like storefront usingNode.js for the Command Line Interface and MySQL 
 * [Easy Table module](https://www.npmjs.com/package/easy-table) Node module for formatting tables in the console.
 * [CLI table module](https://www.npmjs.com/package/cli-table) Another Table alternative for the CLI.
 
+## SQL Schema and Seeds for the product and department table
+
 ## How the storefront works
 ### `bamazonCustomer.js`
 This program starts with loading the screen with the current list of items available to buy.
@@ -82,6 +84,32 @@ Create a New Department asks you to enter a new department name and overhead cos
 ![Supervisor Add New Department](/assets/supervisor-dept2.JPG)
 
 #### SQL commands used
+I needed to modify the product table so that each department name was replaced with the correct department_id.
+I found a way to change it from [Stackoverflow - Can I move a column from one table to another...](https://stackoverflow.com/questions/13633965/can-i-move-a-column-from-one-mysql-table-to-another-and-replace-the-original-co)
+```
+-- For bamazonSupervisor.js
+CREATE TABLE departments (
+    department_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    department_name VARCHAR(60),
+    over_head_costs DECIMAL(6,2)
+);
+
+-- copy from products table to departments table without creating duplicates using SELECT DISTINCT
+INSERT INTO departments (department_name) 
+SELECT DISTINCT department_name FROM products;
+
+-- Add department_id to products table, which references departments
+ALTER TABLE products ADD COLUMN department_id INT, 
+    ADD FOREIGN KEY (department_id) REFERENCES departments(department_id);
+
+-- update products table with corresponding department_id, based on JOIN of department_name in both tables. Multi-Table UPDATE is MySQL only syntax.
+UPDATE products JOIN departments USING (department_name)
+SET products.department_id = departments.department_id;
+
+-- delete redundant department_name from products table.
+ALTER TABLE products DROP COLUMN department_name;
+```
+
 To get the total profits, the product and department tables needed to be joined so that the sum of the product sales by department is subtracted by the department overhead.
 * `SUM(products.product_sales)-departments.over_head_costs AS total_profit`
 ```
