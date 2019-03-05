@@ -65,6 +65,8 @@ INNER JOIN departments
 ON products.department_id = departments.department_id
 ORDER BY department
 ```
+* `INSERT INTO products SET product_name, price, department_id ` is used to add a new product.
+* `UPDATE products SET stock_quantity = stock_quantity + ? WHERE item_id = ?` is used to add stock to existing item.
 
 ### `bamazonSupervisor.js`
 The Supervisor main menu gives you two choices: View Product Sales by Department and Create a New Department. 
@@ -81,7 +83,7 @@ Create a New Department asks you to enter a new department name and overhead cos
 
 #### SQL commands used
 To get the total profits, the product and department tables needed to be joined so that the sum of the product sales by department is subtracted by the department overhead.
-    * `SUM(products.product_sales)-departments.over_head_costs AS total_profit`
+* `SUM(products.product_sales)-departments.over_head_costs AS total_profit`
 ```
 SELECT products.department_id, 
     departments.department_name, 
@@ -94,12 +96,11 @@ ON products.department_id = departments.department_id
 WHERE departments.department_id = ?
 GROUP BY departments.department_name;
 ```
+* To add a new department, `INSERT INTO` is used
 
 
-## SQL Commands
+## SQL Schema and Seeds
 
-* `SELECT * FROM products` - shows all the items in the products table.
-* `UPDATE products SET stock_quantity = stock_quantity + ? WHERE item_id = ?` - updates the quatity of the selected item by item ID
 * INSERT INTO products SET - adds a new item
 
 ```
