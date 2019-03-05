@@ -129,19 +129,6 @@ GROUP BY departments.department_name;
 ```
 * To add a new department, `INSERT INTO` is used
 
-
-## SQL Schema and Seeds
-
-* INSERT INTO products SET - adds a new item
-
-```
-ALTER TABLE table_name ADD column_name datatype --add column
-ALTER TABLE table_name DROP COLUMN column_name --delete column
-ALTER TABLE table_name ALTER COLUMN column_name datatype --SQL Server
-ALTER TABLE table_name MODIFY COLUMN column_name datatype --MySQL
-ALTER TABLE table_name MODIFY column_name datatype --Oracle 10G+
-```
-
 ## Programmer's Notes
 * Inquirer can have paginated lists
     * Each item in list can have a value
