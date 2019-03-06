@@ -1,8 +1,8 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-var Table = require('easy-table');
 var figlet = require('figlet');
-const chalk = require('chalk');
+const colors = require('colors');
+var Table = require('cli-table');
 
 // MySQL Config
 const config = {
@@ -19,7 +19,7 @@ var connection = mysql.createConnection(config);
 // show list of existing departments to select from
 const viewAllDept = () => {
     console.log('\033[2J'); // clears screen
-    console.log(chalk.yellow(figlet.textSync('Department Page', { font: 'Small Slant' })));
+    console.log(figlet.textSync('Department Page', { font: 'Small Slant' }));
     const queryStr = 'SELECT department_id, department_name FROM departments';
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
@@ -45,7 +45,7 @@ const viewAllDept = () => {
 
 const viewSingleDept = (id) => {
     console.log('\033[2J'); // clears screen
-    console.log(chalk.yellow(figlet.textSync('Department Page', { font: 'Small Slant' })));
+    console.log(figlet.textSync('Department Page', { font: 'Small Slant' }).yellow);
     const queryStr = `
     SELECT products.department_id, 
         departments.department_name, 
@@ -60,25 +60,25 @@ const viewSingleDept = (id) => {
     connection.query(queryStr, id, function (err, response) {
         if (err) throw err;
         console.log('\033[2J'); // clears screen
-        let prodTable = new Table;
+        let deptTable = new Table({
+            head: ["Dept ID", "Dept Name", "Overhead Costs", "Product Sales", "Total Profit"]
+        });
         response.forEach(dept => {
-            prodTable.cell("Dept. ID", dept.department_id);
-            prodTable.cell("Dept. Name", dept.department_name);
-            prodTable.cell("Overhead Costs", dept.over_head_costs, Table.number(2));
-            prodTable.cell("Product Sales", dept.product_sales, Table.number(2));
-            prodTable.cell("total_profit", dept.total_profit, Table.number(2))
-            prodTable.newRow();
+            deptTable.push(
+                [dept.department_id, dept.department_name, dept.over_head_costs.toFixed(2), dept.product_sales.toFixed(2), dept.total_profit.toFixed(2)]
+            );
         });
         console.log('\033[2J'); // clears screen
-        console.log(prodTable.toString());
+        console.log(figlet.textSync('Department Page', { font: 'Small Slant' }).yellow);
+        console.log(deptTable.toString());
         goHome(); // callback = mainMenu()
     });
 }
 
-// ADD NEW ITEM
+// ADD NEW DEPT
 const insertDept = () => {
     console.log('\033[2J'); // clears screen
-    console.log(chalk.yellow(figlet.textSync('Add New Department', { font: 'Small Slant' })));
+    console.log(figlet.textSync('Add New Department', { font: 'Small Slant' }).yellow);
     inquirer.prompt([
         {
             type: 'input',
@@ -113,15 +113,32 @@ const insertItem = (department_name, over_head_costs) => {
     }]
     connection.query(queryStr, newitem, function (err, response) {
         if (err) throw err;
-        console.log(department_name.toUpperCase() + " has been added!\n" + response.message);
-        goHome();
-    });
+        console.log(department_name.toUpperCase() + " has been added successfully!\n" + response.message);
+        const singleQuery = `
+        SELECT * FROM departments 
+        WHERE department_name = ?`;
+        connection.query(singleQuery, department_name, function (err, response) {
+            if (err) throw err;
+            // get an array of ID's to be used to see if the item that the user ordered exists.
+            // generate table
+            let deptTable = new Table({
+                head: ["Dept ID", "Dept Name", "Overhead Costs"]
+            });
+            deptTable.push(
+                [response[0].department_id, response[0].department_name, response[0].over_head_costs.toFixed(2)]
+            );
+            console.log(deptTable.toString());
+            console.log(`${response[0].department_name.toUpperCase()} Has been Added Sucessfully!`);
+            goHome();
+        });
+    })
 }
+
 const mainMenu = () => {
     console.log('\033[2J'); // clears screen
-    console.log(chalk.yellow(figlet.textSync('Bamazon')));
-    console.log(chalk.yellow(figlet.textSync('Supervisor Page')));
-    console.log(chalk.yellow(figlet.textSync('Main Menu', { font: 'Small Slant' })));
+    console.log(figlet.textSync('Bamazon').yellow);
+    console.log(figlet.textSync('Supervisor Page').yellow);
+    console.log(figlet.textSync('Main Menu', { font: 'Small Slant' }).yellow);
     const menu = {
         type: 'list',
         name: 'menu',

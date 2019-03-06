@@ -139,7 +139,7 @@ const updateSingleItem = (currentID, currentQTY) => {
                 [response[0].item_id, response[0].product_name, response[0].price.toFixed(2), response[0].department_name, response[0].stock_quantity]
                 );
                 console.log(prodTable.toString());
-                console.log(`${response[0].product_name.toUpperCase()} Has been successfully updated!\n ${response.message}`);
+                console.log(`${response[0].product_name.toUpperCase()} Has been successfully updated!`);
             goHome();
         });
     })
@@ -236,7 +236,7 @@ const insertPrompt = () => {
                     [response[0].item_id, response[0].product_name, response[0].price.toFixed(2), response[0].department_name, response[0].stock_quantity]
                     );
                     console.log(prodTable.toString());
-                    console.log(`${response[0].product_name.toUpperCase()} Has been Added Sucessfully!\n ${response.message}`);
+                    console.log(`${response[0].product_name.toUpperCase()} Has been Added Sucessfully!`);
                 goHome();
             })
         });
