@@ -46,7 +46,7 @@ View Low Inventory section shows all items that have 5 or less stock quantity:
 ![Manager View Low Inventory](/assets/manager-low-inv.JPG)
 
 Update Inventory section first shows a list of current items taken from the database table. Then you can add more stock.
-![Manager Update Inventory](/assets/manager-update-stock.JPG)
+![Manager Update Inventory](/assets/manager-update-stock1.JPG)
 
 Add New Product section lets you first select from a list the current departments available. 
 ![Manager Add New Product 1](/assets/manager-insert-1.JPG)
@@ -80,7 +80,7 @@ The Supervisor main menu gives you two choices: View Product Sales by Department
 The View Product Sales by Department menu lets you choose a department from a paginated list. 
 ![Supervisor View Product Sales](/assets/supervisor-dept1.JPG)
 
-Results from the **video games** department: 
+Results from the **movies** department: 
 ![Supervisor View Product Sales 2](/assets/supervisor-dept2.JPG)
 
 Create a New Department asks you to enter a new department name and overhead costs.

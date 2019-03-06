@@ -1,8 +1,8 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-var Table = require('easy-table');
 var figlet = require('figlet');
-const chalk = require('chalk');
+const colors = require('colors');
+var Table = require('cli-table');
 
 // MySQL Config
 const config = {
@@ -16,16 +16,9 @@ const config = {
 // ESTABLISH CONNECTION object
 var connection = mysql.createConnection(config);
 
-// ----- ALL ITEMS TABLE GENERATORS ----- \\
-const tableGenerator = (arg, callback) => {
-
-}
-
-// ----- CRUD FUNCTIONS ----- \\
-
 const viewInventory = () => {
     console.log('\033[2J'); // clears screen
-    console.log(chalk.yellow(figlet.textSync('All Inventory', { font: 'Small Slant' })));
+    console.log(figlet.textSync('All Inventory', { font: 'Small Slant' }).yellow);
     const queryStr = `
     SELECT 
     item_id, 
@@ -33,7 +26,7 @@ const viewInventory = () => {
     departments.department_name AS department,
     price,
     stock_quantity,
-    CAST(product_sales AS DECIMAL(6,2)) AS sales 
+    product_sales 
     FROM products
     INNER JOIN departments
     ON products.department_id = departments.department_id
@@ -42,15 +35,14 @@ const viewInventory = () => {
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
         response; // assign to global variable
-        let prodTable = new Table;
+        let prodTable = new Table({
+            head: ["Item ID", "Product Name", "Department", "Price", "Stock Qty", "Product Sales"]
+        });
         response.forEach(element => {
-            prodTable.cell("Item ID", element.item_id);
-            prodTable.cell("Product Name", element.product_name);
-            prodTable.cell("Department", element.department);
-            prodTable.cell("Price", element.price, Table.number(2));
-            prodTable.cell("Stock Qty", element.stock_quantity);
-            prodTable.cell("Product Sales", element.sales, Table.number(2));
-            prodTable.newRow();
+            prodTable.push(
+                [element.item_id, element.product_name, element.department,
+                element.price.toFixed(2), element.stock_quantity, element.product_sales.toFixed(2)]
+            )
         });
         console.log(prodTable.toString());
         goHome();
@@ -59,7 +51,7 @@ const viewInventory = () => {
 
 const viewLowInventory = (callback) => {
     console.log('\033[2J'); // clears screen
-    console.log(chalk.yellow(figlet.textSync('Low Inventory', { font: 'Small Slant' })));
+    console.log(figlet.textSync('Low Inventory', { font: 'Small Slant' }).yellow);
     // show inventory where QTY <= 5
     const queryStr = `
     SELECT 
@@ -67,19 +59,19 @@ const viewLowInventory = (callback) => {
     product_name,
     price,
     stock_quantity,
-    CAST(product_sales AS DECIMAL(6,2)) AS sales 
+    product_sales 
     FROM products
     WHERE stock_quantity <= 5`;
     connection.query(queryStr, function (err, response) {
         if (err) throw err;
-        let prodTable = new Table;
+        let prodTable = new Table({
+            head: ["Item ID", "Product Name", "Price", "Stock Qty", "Product Sales"]
+        });
         response.forEach(element => {
-            prodTable.cell("Item ID", element.item_id);
-            prodTable.cell("Product Name", element.product_name);
-            prodTable.cell("Price", element.price, Table.number(2));
-            prodTable.cell("Stock Quantity", element.stock_quantity);
-            prodTable.cell("Product Sales", element.sales, Table.number(2));
-            prodTable.newRow();
+            prodTable.push(
+                [element.item_id, element.product_name, element.price.toFixed(2),
+                element.stock_quantity, element.product_sales.toFixed(2)]
+            )
         });
         console.log(prodTable.toString());
         goHome();
@@ -88,7 +80,7 @@ const viewLowInventory = (callback) => {
 
 const updateInventoryList = () => {
     console.log('\033[2J'); // clears screen
-    console.log(chalk.yellow(figlet.textSync('Update Inventory', { font: 'Small Slant' })));
+    console.log(figlet.textSync('Update Inventory', { font: 'Small Slant' }).yellow);
     // get all the products to insert as a list of choices
     const queryStr = "SELECT item_id, product_name FROM products";
     connection.query(queryStr, function (err, response) {
@@ -139,7 +131,8 @@ const updateSingleItem = (currentID, currentQTY) => {
 
 // ADD NEW ITEM
 const insertPrompt = () => {
-    console.log(chalk.yellow(figlet.textSync('Add New item', { font: 'Small Slant' })));
+    console.log('\033[2J'); // clears screen
+    console.log(figlet.textSync('Add New item', { font: 'Small Slant' }).yellow);
     // get list of existing deparments
     const queryStr = "SELECT department_id, department_name FROM departments";
     connection.query(queryStr, function (err, response) {
@@ -217,9 +210,9 @@ const insertItem = (department_id, product_name, price, stock_quantity) => {
 
 const mainMenu = () => {
     console.log('\033[2J'); // clears screen
-    console.log(chalk.yellow(figlet.textSync('Bamazon')));
-    console.log(chalk.yellow(figlet.textSync('Manager Page')));
-    console.log(chalk.yellow(figlet.textSync('Main Menu', {font: 'Small Slant'})));
+    console.log(figlet.textSync('Bamazon').yellow);
+    console.log(figlet.textSync('Manager Page').yellow);
+    console.log(figlet.textSync('Main Menu', { font: 'Small Slant' }).yellow);
 
     console.log("\n");
     const menu = {

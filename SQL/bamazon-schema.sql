@@ -4,22 +4,19 @@ CREATE DATABASE bamazon;
 
 USE bamazon;
 
+-- PRODUCTS - UPDATED to include department_id and department_name dropped.
 CREATE TABLE products (
  item_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
  product_name VARCHAR(60) NULL,
- department_name VARCHAR(60) NULL,
- price DECIMAL(6,2),
- stock_quantity INTEGER(6)
+ price DECIMAL(10,2),
+ stock_quantity INTEGER(10),
+ product_sales DECIMAL(10,2) DEFAULT 0,
+ department_id INT
 );
 
--- add product_sales column
-ALTER TABLE products ADD product_sales DECIMAL(6,2);
-
-UPDATE products SET product_sales = 0;
-
-SELECT * FROM products;
-
-SELECT 
-department_id, department_name, overhead_costs, price*stock_quantity AS prod_sales, 
-prod_sales-overhead_costs AS total_profit 
-FROM products;
+-- DEPARTMENTS
+CREATE TABLE departments (
+    department_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    department_name VARCHAR(60),
+    over_head_costs DECIMAL(10,2)
+);
