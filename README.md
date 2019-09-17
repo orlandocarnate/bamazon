@@ -1,13 +1,28 @@
 # bamazon
 An Amazon-like storefront usingNode.js for the Command Line Interface and MySQL for the database. The app will take in orders from customers and deplete stock from the store's inventory.
 
-## Technology Used
+## Getting Started
+The following framework and packages are required to get the project up and running on your local machine for development and testing purposes.
+
+### Technology Used
 * [Node.js](https://nodejs.org/)
 * [MySQL database](https://www.mysql.com/)
 * [MySQL module](https://www.npmjs.com/package/mysql) Node module is a driver for MySQL. 
 * [Inquirer module](https://www.npmjs.com/package/inquirer) Node module prompts the user. A command line interface (CLI)
 * [CLI table module](https://www.npmjs.com/package/cli-table) Node module for formatting tables in the console.
 * [Colors module](https://www.npmjs.com/package/colors) Node module for adding color.
+
+### Installation
+Download the repo using the `git clone` command in your terminal
+
+## Running the applications
+Within your terminal, you can run the following commands for each role:
+Customer Storefront App: 
+* `node bamazonCustomer.js`
+Manager App: 
+* `node bamazonManager.js`
+Supervisor App: 
+* `node bamazonSupervisor.js`
 
 ## SQL Schema and Seeds for the product and department table
 * [SQL Product & Department Table Schema](/SQL/bamazon-schema.sql)
