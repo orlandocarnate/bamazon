@@ -17,10 +17,13 @@ Download the repo using the `git clone` command in your terminal
 
 ## Running the applications
 Within your terminal, you can run the following commands for each role:
+
 Customer Storefront App: 
 * `node bamazonCustomer.js`
+
 Manager App: 
 * `node bamazonManager.js`
+
 Supervisor App: 
 * `node bamazonSupervisor.js`
 
